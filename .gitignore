@@ -1,0 +1,12 @@
+.env
+src/tradier/.env
+data/
+__pycache__/
+*.pyc
+*.pyo
+*.env
+.DS_Store
+.venv/
+venv/
+dist/
+build/

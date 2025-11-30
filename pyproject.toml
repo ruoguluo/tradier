@@ -1,0 +1,21 @@
+[project]
+name = "tradier"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Russell Luo",email = "russell.lrg@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "lumiwealth-tradier (>=0.1.17,<0.2.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "requests (>=2.32.5,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "tradier", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
