@@ -1,4 +1,5 @@
 import os, dotenv, csv
+import pandas as pd
 from datetime import datetime, timedelta
 from pathlib import Path
 from lumiwealth_tradier import Tradier
@@ -28,8 +29,11 @@ def main():
         df = data
         if "datetime" not in getattr(df, "columns", []):
             df = df.reset_index()
+        df["datetime"] = pd.to_datetime(df["datetime"]).dt.tz_convert(None)
+        df["Date"] = df["datetime"].dt.strftime("%Y-%m-%d")
+        df["Time"] = df["datetime"].dt.strftime("%H:%M")
         df["symbol"] = "SPY"
-        cols = ["symbol", "datetime"] + [c for c in ["price", "open", "high", "low", "close", "volume", "vwap"] if c in df.columns]
+        cols = ["symbol", "Date", "Time"] + [c for c in ["price", "open", "high", "low", "close", "volume", "vwap"] if c in df.columns]
         df[cols].to_csv(out_path, index=False)
     else:
         rows = []
@@ -39,11 +43,19 @@ def main():
             rows = data
         with out_path.open("w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["symbol", "datetime", "price", "open", "high", "low", "close", "volume", "vwap"])
+            w.writerow(["symbol", "Date", "Time", "price", "open", "high", "low", "close", "volume", "vwap"])
             for r in rows:
+                ts_raw = r.get("datetime") or r.get("time")
+                try:
+                    ts = pd.to_datetime(ts_raw).tz_convert(None)
+                except Exception:
+                    ts = pd.to_datetime(ts_raw)
+                date_str = ts.strftime("%Y-%m-%d")
+                time_str = ts.strftime("%H:%M")
                 w.writerow([
                     "SPY",
-                    r.get("datetime") or r.get("time"),
+                    date_str,
+                    time_str,
                     r.get("price"),
                     r.get("open"),
                     r.get("high"),
