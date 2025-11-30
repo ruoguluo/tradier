@@ -30,10 +30,11 @@ def main():
     out_path = out_dir / "spy_daily.csv"
     if hasattr(data, "to_csv"):
         df = data
-        cols = [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
-        if "date" in getattr(df, "columns", []):
-            df = df.set_index("date")
-        df[cols].to_csv(out_path, index=True, index_label="date")
+        if "date" not in getattr(df, "columns", []):
+            df = df.reset_index()
+        df["symbol"] = "SPY"
+        cols = ["symbol", "date"] + [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
+        df[cols].to_csv(out_path, index=False)
     else:
         days = []
         if isinstance(data, dict):
@@ -46,9 +47,10 @@ def main():
             days = data
         with out_path.open("w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["date", "open", "high", "low", "close", "volume"])
+            w.writerow(["symbol", "date", "open", "high", "low", "close", "volume"])
             for d in days:
                 w.writerow([
+                    "SPY",
                     d.get("date"),
                     d.get("open"),
                     d.get("high"),

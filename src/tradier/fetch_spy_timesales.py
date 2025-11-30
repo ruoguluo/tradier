@@ -26,10 +26,11 @@ def main():
     out_path = out_dir / "spy_timesales.csv"
     if hasattr(data, "to_csv"):
         df = data
-        cols = [c for c in ["price", "open", "high", "low", "close", "volume", "vwap"] if c in df.columns]
-        if "datetime" in getattr(df, "columns", []):
-            df = df.set_index("datetime")
-        df[cols].to_csv(out_path, index=True, index_label="datetime")
+        if "datetime" not in getattr(df, "columns", []):
+            df = df.reset_index()
+        df["symbol"] = "SPY"
+        cols = ["symbol", "datetime"] + [c for c in ["price", "open", "high", "low", "close", "volume", "vwap"] if c in df.columns]
+        df[cols].to_csv(out_path, index=False)
     else:
         rows = []
         if isinstance(data, dict):
@@ -38,9 +39,10 @@ def main():
             rows = data
         with out_path.open("w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["datetime", "price", "open", "high", "low", "close", "volume", "vwap"])
+            w.writerow(["symbol", "datetime", "price", "open", "high", "low", "close", "volume", "vwap"])
             for r in rows:
                 w.writerow([
+                    "SPY",
                     r.get("datetime") or r.get("time"),
                     r.get("price"),
                     r.get("open"),
